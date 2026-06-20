@@ -13,10 +13,16 @@ export function Historian({ bundle }: { bundle: ProductBundle }) {
   const [done, setDone] = useState(false);
 
   async function tellStory() {
+    const isRegeneration = done;
+    const startTime = Date.now();
     setLoading(true);
     setStory("");
     setDone(false);
-    track("historian_generation_started", { product: bundle.product.name, events: bundle.events.length });
+    track("historian_generation_started", {
+      product: bundle.product.name,
+      events: bundle.events.length,
+      isRegeneration,
+    });
 
     try {
       const res = await fetch("/api/historian", {
@@ -50,9 +56,18 @@ export function Historian({ bundle }: { bundle: ProductBundle }) {
         setStory(acc);
       }
       setDone(true);
-      track("historian_generation_completed", { product: bundle.product.name, chars: acc.length });
-    } catch {
+      track("historian_generation_completed", {
+        product: bundle.product.name,
+        chars: acc.length,
+        streamDurationMs: Date.now() - startTime,
+      });
+    } catch (err) {
       setStory("Unable to generate story right now.");
+      track("historian_generation_failed", {
+        product: bundle.product.name,
+        eventCount: bundle.events.length,
+        errorMessage: (err instanceof Error ? err.message : "unknown").substring(0, 100),
+      });
     } finally {
       setLoading(false);
     }

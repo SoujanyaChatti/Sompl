@@ -9,10 +9,10 @@ export function StoryShare({ slug, name }: { slug: string; name: string }) {
 
   async function share() {
     const url = typeof window !== "undefined" ? `${window.location.origin}/story/${slug}` : "";
-    track("public_story_shared", { product: slug });
     try {
       if (navigator.share) {
         await navigator.share({ title: `The evolution of ${name}`, url });
+        track("public_story_shared", { product: slug, shareMethod: "native" });
         return;
       }
     } catch {
@@ -22,6 +22,7 @@ export function StoryShare({ slug, name }: { slug: string; name: string }) {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
+      track("public_story_shared", { product: slug, shareMethod: "clipboard" });
     } catch {
       /* ignore */
     }
