@@ -69,6 +69,14 @@ export function ProductCard({
               </>
             )}
           </div>
+          {product.ownerName && (
+            <div className="mt-3 flex items-center gap-1.5 border-t border-white/[0.05] pt-3 text-[11px] text-ink-faint">
+              <span className="grid h-4 w-4 place-items-center rounded-full bg-brand/25 text-[9px] font-semibold text-brand-glow">
+                {product.ownerName.charAt(0).toUpperCase()}
+              </span>
+              by {product.ownerName}
+            </div>
+          )}
         </div>
       </Link>
     </motion.div>

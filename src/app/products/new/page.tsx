@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { GRADIENTS, gradientFor } from "@/lib/cn";
 import { motion } from "framer-motion";
-import { Dna, Check } from "lucide-react";
+import { Dna, Check, Lock } from "lucide-react";
+import { AuthModal } from "@/components/AuthModal";
 
 const CATEGORIES = [
   "Consumer App",
@@ -21,11 +23,39 @@ const CATEGORIES = [
 export default function NewProductPage() {
   const router = useRouter();
   const { createProduct } = useStore();
+  const { user, authEnabled, loading } = useAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [cover, setCover] = useState("violet");
   const [isPublic, setIsPublic] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+
+  // When auth is enabled, require sign-in before creating a product.
+  const needsAuth = authEnabled && !loading && !user;
+  if (needsAuth) {
+    return (
+      <div className="container max-w-md py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card grid place-items-center px-6 py-14 text-center"
+        >
+          <span className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-brand/10">
+            <Lock size={22} className="text-brand-glow" />
+          </span>
+          <h1 className="text-xl font-semibold">Sign in to create a product</h1>
+          <p className="mt-1 max-w-xs text-sm text-ink-muted">
+            Your products are tied to your account, so your team always knows who recorded what.
+          </p>
+          <button onClick={() => setAuthOpen(true)} className="btn-primary mt-6">
+            Sign in or create account
+          </button>
+        </motion.div>
+        <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      </div>
+    );
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();

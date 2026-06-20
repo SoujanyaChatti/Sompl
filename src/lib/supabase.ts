@@ -9,7 +9,11 @@ export function supabase(): SupabaseClient | null {
   if (!hasSupabase()) return null;
   if (!_client) {
     _client = createClient(env.supabaseUrl, env.supabaseAnonKey, {
-      auth: { persistSession: false },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
     });
   }
   return _client;

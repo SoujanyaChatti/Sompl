@@ -194,7 +194,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       if (usingRemote) {
         remote
-          .insertProduct({ ...product, seeded: false })
+          .currentUserId()
+          .then((ownerId) =>
+            remote.insertProduct({ ...product, seeded: false, ownerId })
+          )
           .then((saved) => {
             if (!saved) return;
             // reconcile temp id -> real db id (slug stays the same)

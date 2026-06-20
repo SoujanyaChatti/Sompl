@@ -5,8 +5,18 @@ import { SEED_BUNDLES } from "./seed";
 // Remote (Supabase) data layer. All functions no-op / return null when
 // Supabase isn't configured so callers can fall back to localStorage.
 
+// Current logged-in user's id (auth.uid()), or null if anonymous.
+export async function currentUserId(): Promise<string | null> {
+  const sb = supabase();
+  if (!sb) return null;
+  const { data } = await sb.auth.getUser();
+  return data.user?.id ?? null;
+}
+
 // ── row <-> app mappers ────────────────────────────────────────────────────
 function rowToProduct(r: any): Product {
+  // profiles may be joined as r.profiles (object) when selected
+  const prof = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
   return {
     id: r.id,
     slug: r.slug,
@@ -17,6 +27,7 @@ function rowToProduct(r: any): Product {
     accent: r.accent ?? "#7c5cff",
     isPublic: !!r.is_public,
     owner: r.owner ?? "museum",
+    ownerName: prof?.display_name || prof?.handle || (r.seeded ? undefined : undefined),
     seeded: !!r.seeded,
   };
 }
@@ -56,7 +67,10 @@ export async function fetchAll(): Promise<{
   const sb = supabase();
   if (!sb) return null;
   const [{ data: p, error: pe }, { data: f }, { data: e }] = await Promise.all([
-    sb.from("products").select("*").order("created_at", { ascending: false }),
+    sb
+      .from("products")
+      .select("*, profiles:owner(handle, display_name)")
+      .order("created_at", { ascending: false }),
     sb.from("features").select("*"),
     sb.from("events").select("*").order("date", { ascending: true }),
   ]);
@@ -79,6 +93,7 @@ export async function insertProduct(p: {
   isPublic: boolean;
   owner: string;
   seeded?: boolean;
+  ownerId?: string | null; // auth.uid() of the creator (required by RLS for non-seed)
 }): Promise<Product | null> {
   const sb = supabase();
   if (!sb) return null;
@@ -92,7 +107,7 @@ export async function insertProduct(p: {
       cover: p.cover,
       accent: p.accent,
       is_public: p.isPublic,
-      owner: null, // anon demo; owner FK is nullable in practice
+      owner: p.ownerId ?? null,
       seeded: p.seeded ?? false,
     })
     .select()

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
+import { AuthProvider } from "@/lib/auth";
 import { NovusLoader } from "@/components/NovusLoader";
 import { Nav } from "@/components/Nav";
 
@@ -31,10 +32,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen antialiased">
         <NovusLoader />
-        <StoreProvider>
-          <Nav />
-          <main className="relative">{children}</main>
-        </StoreProvider>
+        <AuthProvider>
+          <StoreProvider>
+            <Nav />
+            <main className="relative">{children}</main>
+          </StoreProvider>
+        </AuthProvider>
       </body>
     </html>
   );

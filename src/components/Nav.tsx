@@ -6,10 +6,15 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { useState } from "react";
 import { ActivityPanel } from "./ActivityPanel";
+import { AuthModal } from "./AuthModal";
+import { useAuth } from "@/lib/auth";
+import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 
 export function Nav() {
   const pathname = usePathname();
   const [activityOpen, setActivityOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const { user, signOut, authEnabled } = useAuth();
 
   // hide global nav on public story pages (they own their chrome)
   if (pathname?.startsWith("/story/")) return null;
@@ -50,10 +55,35 @@ export function Nav() {
               <Plus size={15} />
               <span className="hidden sm:inline">New Product</span>
             </Link>
+
+            {authEnabled && (
+              user ? (
+                <div className="flex items-center gap-1.5 pl-1">
+                  <span
+                    className="hidden items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5 text-xs text-ink-muted sm:flex"
+                    title={user.email}
+                  >
+                    <span className="grid h-4 w-4 place-items-center rounded-full bg-brand/30 text-[9px] font-semibold text-brand-glow">
+                      {user.displayName.charAt(0).toUpperCase()}
+                    </span>
+                    {user.displayName}
+                  </span>
+                  <button onClick={() => signOut()} className="btn-ghost !px-2.5" title="Sign out">
+                    <LogOut size={15} />
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setAuthOpen(true)} className="btn-ghost !px-3">
+                  <LogIn size={15} />
+                  <span className="hidden sm:inline">Sign in</span>
+                </button>
+              )
+            )}
           </div>
         </div>
       </header>
       <ActivityPanel open={activityOpen} onClose={() => setActivityOpen(false)} />
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   );
 }
