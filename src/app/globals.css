@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+* {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(124, 92, 255, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(29, 185, 84, 0.06), transparent 55%),
+    #0a0a0f;
+  color: #ececf1;
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(124, 92, 255, 0.35);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.16);
+  background-clip: padding-box;
+}
+
+@layer components {
+  .glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  .card {
+    @apply rounded-2xl border border-white/[0.06] bg-bg-card/80;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn text-white;
+    background: linear-gradient(180deg, #8b6dff, #6a4ae0);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 8px 24px -8px rgba(124, 92, 255, 0.6);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    @apply btn text-ink-muted hover:text-ink hover:bg-white/[0.05] border border-white/[0.06];
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-white/[0.08] bg-black/30 px-4 py-3 text-sm text-ink placeholder:text-ink-faint outline-none transition focus:border-brand/60 focus:ring-2 focus:ring-brand/20;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-xs font-medium text-ink-muted;
+  }
+
+  .heading-gradient {
+    background: linear-gradient(180deg, #fff 20%, rgba(255, 255, 255, 0.55));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* React Flow theming */
+.react-flow__attribution {
+  display: none;
+}
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+.react-flow__controls {
+  background: #13131b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #9b9ba8;
+  fill: #9b9ba8;
+}
+.react-flow__controls-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* markdown prose */
+.prose-dna h2 { @apply text-xl font-semibold text-ink mt-6 mb-3; }
+.prose-dna h3 { @apply text-base font-semibold text-ink mt-5 mb-2; }
+.prose-dna p { @apply text-ink-muted leading-relaxed mb-3; }
+.prose-dna ul { @apply space-y-1.5 mb-3 pl-1; }
+.prose-dna li { @apply text-ink-muted leading-relaxed list-none relative pl-5; }
+.prose-dna li::before { content: "›"; @apply absolute left-0 text-brand-glow; }
+.prose-dna strong { @apply text-ink font-semibold; }
+.prose-dna blockquote { @apply border-l-2 border-brand/60 pl-4 italic text-ink my-4; }
+.prose-dna a { @apply text-brand-glow underline; }
