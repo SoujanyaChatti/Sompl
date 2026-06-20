@@ -13,13 +13,22 @@ import { StoryShare } from "@/components/StoryShare";
 import { useEffect } from "react";
 import { track } from "@/lib/novus";
 
+const viewedStories = new Set<string>();
+
 export default function StoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { getBundle, ready } = useStore();
   const bundle = getBundle(slug);
 
   useEffect(() => {
-    if (bundle) track("public_story_viewed", { product: slug });
+    if (bundle && !viewedStories.has(slug)) {
+      viewedStories.add(slug);
+      track("public_story_viewed", {
+        product: slug,
+        featureCount: bundle.features.length,
+        eventCount: bundle.events.length,
+      });
+    }
   }, [bundle, slug]);
 
   const lessons = useMemo(

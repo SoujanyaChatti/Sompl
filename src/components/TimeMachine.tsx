@@ -38,7 +38,10 @@ export function TimeMachine({
 
   useEffect(() => {
     if (!playing) return;
-    track("time_machine_replay", {});
+    track("time_machine_replay", {
+      totalEventCount: events.length,
+      startPosition: pos,
+    });
     const step = () => {
       setPos((p) => {
         if (p >= 100) {
@@ -77,7 +80,12 @@ export function TimeMachine({
           onClick={() => {
             if (pos >= 100) setPos(0);
             setPlaying((p) => !p);
-            track("time_machine_used", { action: playing ? "pause" : "play" });
+            track("time_machine_used", {
+              action: playing ? "pause" : "play",
+              position: pos,
+              visibleEventCount: visibleCount,
+              totalEventCount: events.length,
+            });
           }}
           className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand/15 text-brand-glow transition hover:bg-brand/25"
         >
@@ -115,7 +123,12 @@ export function TimeMachine({
               setPlaying(false);
               setPos(Number(e.target.value));
             }}
-            onMouseUp={() => track("time_machine_used", { action: "scrub" })}
+            onMouseUp={() => track("time_machine_used", {
+              action: "scrub",
+              position: pos,
+              visibleEventCount: visibleCount,
+              totalEventCount: events.length,
+            })}
             className="relative z-10 h-6 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-brand/50 [&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-brand"
           />
         </div>

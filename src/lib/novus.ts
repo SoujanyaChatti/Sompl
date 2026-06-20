@@ -7,6 +7,9 @@ type Props = Record<string, unknown>;
 
 declare global {
   interface Window {
+    pendo?: {
+      track?: (event: string, props?: Props) => void;
+    };
     novus?: {
       track?: (event: string, props?: Props) => void;
       page?: (name?: string, props?: Props) => void;
@@ -20,6 +23,13 @@ const LOG_KEY = "featuredna:novus-log";
 
 export function track(event: string, props: Props = {}) {
   if (typeof window === "undefined") return;
+
+  // Forward to Pendo if available.
+  try {
+    window.pendo?.track?.(event, props);
+  } catch {
+    /* never let analytics break the app */
+  }
 
   // Forward to Novus if available.
   try {

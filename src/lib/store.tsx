@@ -190,7 +190,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         slug: `${slugify(p.name)}-${tempId.slice(-4)}`,
       };
       setState((s) => ({ ...s, products: [product, ...s.products] }));
-      track("product_created", { name: p.name, category: p.category });
+      track("product_created", {
+        name: p.name,
+        category: p.category,
+        isPublic: p.isPublic,
+        cover: p.cover,
+        descriptionLength: (p.description || "").length,
+      });
 
       if (usingRemote) {
         remote
@@ -216,15 +222,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const togglePublic = useCallback(
     (productId: string) => {
       let nextVal = false;
+      let productName = "";
       setState((s) => ({
         ...s,
         products: s.products.map((p) => {
           if (p.id !== productId) return p;
           nextVal = !p.isPublic;
+          productName = p.name;
           return { ...p, isPublic: nextVal };
         }),
       }));
-      track("product_publish_toggled", { productId });
+      track("product_publish_toggled", { productId, productName, isPublic: nextVal });
       if (usingRemote) {
         remote
           .updateProductPublic(productId, nextVal)
@@ -239,7 +247,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const tempId = uid("feat");
       const feature: Feature = { ...f, id: tempId };
       setState((s) => ({ ...s, features: [...s.features, feature] }));
-      track("feature_created", { name: f.name, productId: f.productId });
+      track("feature_created", {
+        name: f.name,
+        productId: f.productId,
+        parentId: f.parentId,
+        status: f.status,
+        hasParent: !!f.parentId,
+      });
       if (usingRemote) {
         remote
           .insertFeature(f)
@@ -265,7 +279,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const tempId = uid("evt");
       const event: EvolutionEvent = { ...ev, id: tempId };
       setState((s) => ({ ...s, events: [...s.events, event] }));
-      track("event_added", { type: ev.type, source: ev.source, featureId: ev.featureId });
+      track("event_added", {
+        type: ev.type,
+        source: ev.source,
+        featureId: ev.featureId,
+        hasMetrics: !!(ev.metrics && ev.metrics.length > 0),
+        hasLesson: !!ev.lesson,
+        title: ev.title,
+      });
       if (usingRemote) {
         remote
           .insertEvent(ev)
@@ -304,7 +325,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ),
         };
       });
-      track("timeline_reordered", { featureId });
+      track("timeline_reordered", { featureId, eventCount: orderedIds.length });
     },
     []
   );

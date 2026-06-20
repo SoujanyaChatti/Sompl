@@ -48,7 +48,7 @@ export function CommitBox({
   async function parse() {
     if (!text.trim()) return;
     setLoading(true);
-    track("ai_parse_started", { length: text.length });
+    track("ai_parse_started", { length: text.length, source });
     try {
       const res = await fetch("/api/parse-commit", {
         method: "POST",
@@ -57,9 +57,18 @@ export function CommitBox({
       });
       const data = (await res.json()) as Parsed;
       setParsed(data);
-      track("ai_parse_completed", { type: data.type, mocked: data.mocked });
-    } catch {
-      /* swallow */
+      track("ai_parse_completed", {
+        type: data.type,
+        mocked: data.mocked,
+        hasMetrics: !!(data.metrics && data.metrics.length > 0),
+        hasLesson: !!data.lesson,
+        hasAlternatives: !!(data.alternatives && data.alternatives.length > 0),
+      });
+    } catch (err) {
+      track("ai_parse_failed", {
+        inputLength: text.length,
+        errorMessage: (err instanceof Error ? err.message : "unknown").substring(0, 100),
+      });
     } finally {
       setLoading(false);
     }
@@ -67,6 +76,16 @@ export function CommitBox({
 
   function confirm() {
     if (!parsed || !featureId) return;
+    track("smart_commit_confirmed", {
+      featureId,
+      eventType: parsed.type,
+      source,
+      inputLength: text.length,
+      hadMetrics: !!(parsed.metrics && parsed.metrics.length > 0),
+      hadLesson: !!parsed.lesson,
+      hadAlternatives: !!(parsed.alternatives && parsed.alternatives.length > 0),
+      wasMocked: !!parsed.mocked,
+    });
     onCommit({
       featureId,
       type: parsed.type,
