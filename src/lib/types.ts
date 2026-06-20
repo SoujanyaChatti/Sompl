@@ -73,6 +73,8 @@ export interface Product {
   accent: string; // hex
   isPublic: boolean;
   owner: string;
+  /** display name of the uploader (from profiles), if known */
+  ownerName?: string;
   seeded?: boolean;
 }
 
