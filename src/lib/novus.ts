@@ -7,6 +7,12 @@ type Props = Record<string, unknown>;
 
 declare global {
   interface Window {
+    // Novus is delivered via Pendo's web SDK (novus-by-pendo).
+    pendo?: {
+      track?: (event: string, props?: Props) => void;
+      pageLoad?: (props?: Props) => void;
+      initialize?: (opts?: Record<string, unknown>) => void;
+    };
     novus?: {
       track?: (event: string, props?: Props) => void;
       page?: (name?: string, props?: Props) => void;
@@ -21,7 +27,13 @@ const LOG_KEY = "featuredna:novus-log";
 export function track(event: string, props: Props = {}) {
   if (typeof window === "undefined") return;
 
-  // Forward to Novus if available.
+  // Forward to Novus (Pendo web SDK) — the mandatory analytics layer.
+  try {
+    window.pendo?.track?.(event, props);
+  } catch {
+    /* never let analytics break the app */
+  }
+  // Back-compat: also forward to a window.novus shim if one exists.
   try {
     window.novus?.track?.(event, props);
   } catch {
@@ -49,6 +61,12 @@ export function track(event: string, props: Props = {}) {
 
 export function trackPage(name: string, props: Props = {}) {
   if (typeof window === "undefined") return;
+  // Pendo records page views via pageLoad / track.
+  try {
+    window.pendo?.pageLoad?.({ page: name, ...props });
+  } catch {
+    /* ignore */
+  }
   try {
     window.novus?.page?.(name, props);
   } catch {
